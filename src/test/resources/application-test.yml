@@ -1,0 +1,21 @@
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 0
+      timeout: 3000ms
+
+cache:
+  default-expire: 60
+  default-local-expire: 30
+  scheduler-pool-size: 5
+  executor-pool-size: 10
+
+logging:
+  level:
+    com.hxl.cache: DEBUG
+    root: INFO
+
+
+

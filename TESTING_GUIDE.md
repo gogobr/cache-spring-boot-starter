@@ -122,7 +122,7 @@ public void testBasicCache() {
 ```yaml
 logging:
   level:
-    com.hxl.cache: DEBUG
+    com.mx.cache: DEBUG
 ```
 
 查看日志输出，应该看到：
@@ -326,7 +326,7 @@ public class TestController {
 ```yaml
 logging:
   level:
-    com.hxl.cache: DEBUG
+    com.mx.cache: DEBUG
     root: INFO
 ```
 

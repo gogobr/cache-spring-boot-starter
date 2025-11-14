@@ -1,4 +1,4 @@
-package com.hxl.cache.util;
+package com.mx.cache.util;
 
 import lombok.extern.slf4j.Slf4j;
 

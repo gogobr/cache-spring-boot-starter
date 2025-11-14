@@ -1,12 +1,12 @@
-package com.hxl.cache.aspect;
+package com.mx.cache.aspect;
 
-import com.hxl.cache.annotation.CacheableBatch;
-import com.hxl.cache.cache.MultiLevelCacheManager;
-import com.hxl.cache.metadata.CacheAnnotationScanner;
-import com.hxl.cache.metadata.CacheMethodMetadata;
-import com.hxl.cache.util.CompressUtils;
-import com.hxl.cache.util.SerializerUtils;
-import com.hxl.cache.util.SpelUtils;
+import com.mx.cache.annotation.CacheableBatch;
+import com.mx.cache.cache.MultiLevelCacheManager;
+import com.mx.cache.metadata.CacheAnnotationScanner;
+import com.mx.cache.metadata.CacheMethodMetadata;
+import com.mx.cache.util.CompressUtils;
+import com.mx.cache.util.SerializerUtils;
+import com.mx.cache.util.SpelUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;

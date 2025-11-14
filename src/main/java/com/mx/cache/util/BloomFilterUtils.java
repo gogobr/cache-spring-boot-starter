@@ -1,4 +1,4 @@
-package com.hxl.cache.util;
+package com.mx.cache.util;
 
 import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnels;

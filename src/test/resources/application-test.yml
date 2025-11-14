@@ -14,7 +14,7 @@ cache:
 
 logging:
   level:
-    com.hxl.cache: DEBUG
+    com.mx.cache: DEBUG
     root: INFO
 
 

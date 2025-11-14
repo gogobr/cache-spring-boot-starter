@@ -1,8 +1,8 @@
-package com.hxl.cache.cache;
+package com.mx.cache.cache;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.hxl.cache.annotation.Cacheable;
+import com.mx.cache.annotation.Cacheable;
 
 import java.util.concurrent.TimeUnit;
 

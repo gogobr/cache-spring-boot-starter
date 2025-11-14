@@ -1,4 +1,4 @@
-package com.hxl.cache.cache;
+package com.mx.cache.cache;
 
 import java.util.concurrent.TimeUnit;
 

@@ -1,4 +1,4 @@
-package com.hxl.cache.annotation;
+package com.mx.cache.annotation;
 
 import java.lang.annotation.*;
 import java.util.concurrent.TimeUnit;

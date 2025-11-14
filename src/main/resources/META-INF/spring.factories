@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.hxl.cache.config.CacheAutoConfiguration
+com.mx.cache.config.CacheAutoConfiguration

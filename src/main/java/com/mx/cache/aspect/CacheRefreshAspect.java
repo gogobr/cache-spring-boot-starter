@@ -1,9 +1,9 @@
-package com.hxl.cache.aspect;
+package com.mx.cache.aspect;
 
-import com.hxl.cache.annotation.CacheRefresh;
-import com.hxl.cache.cache.MultiLevelCacheManager;
-import com.hxl.cache.metadata.CacheAnnotationScanner;
-import com.hxl.cache.metadata.CacheMethodMetadata;
+import com.mx.cache.annotation.CacheRefresh;
+import com.mx.cache.cache.MultiLevelCacheManager;
+import com.mx.cache.metadata.CacheAnnotationScanner;
+import com.mx.cache.metadata.CacheMethodMetadata;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -32,7 +32,7 @@ public class CacheRefreshAspect {
     // 存储每个方法的刷新任务
     private final Map<String, ScheduledFuture<?>> refreshTasks = new ConcurrentHashMap<>();
 
-    @Around("@annotation(com.hxl.cache.annotation.CacheRefresh)")
+    @Around("@annotation(com.mx.cache.annotation.CacheRefresh)")
     public Object aroundRefresh(ProceedingJoinPoint joinPoint) throws Throwable {
         Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
         CacheMethodMetadata metadata = annotationScanner.getMetadata(method);

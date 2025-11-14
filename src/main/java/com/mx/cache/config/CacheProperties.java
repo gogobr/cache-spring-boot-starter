@@ -1,4 +1,4 @@
-package com.hxl.cache.config;
+package com.mx.cache.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

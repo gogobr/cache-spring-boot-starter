@@ -1,7 +1,7 @@
 //package cache;
 //
 //import cache.service.TestUserService;
-//import com.hxl.cache.cache.MultiLevelCacheManager;
+//import com.mx.cache.cache.MultiLevelCacheManager;
 //import lombok.extern.slf4j.Slf4j;
 //import org.junit.jupiter.api.BeforeEach;
 //import org.junit.jupiter.api.Test;

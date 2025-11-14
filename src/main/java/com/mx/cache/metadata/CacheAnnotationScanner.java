@@ -1,9 +1,9 @@
-package com.hxl.cache.metadata;
+package com.mx.cache.metadata;
 
-import com.hxl.cache.annotation.CachePreload;
-import com.hxl.cache.annotation.CacheRefresh;
-import com.hxl.cache.annotation.Cacheable;
-import com.hxl.cache.annotation.CacheableBatch;
+import com.mx.cache.annotation.CachePreload;
+import com.mx.cache.annotation.CacheRefresh;
+import com.mx.cache.annotation.Cacheable;
+import com.mx.cache.annotation.CacheableBatch;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;

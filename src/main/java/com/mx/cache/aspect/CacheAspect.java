@@ -1,13 +1,13 @@
-package com.hxl.cache.aspect;
+package com.mx.cache.aspect;
 
-import com.hxl.cache.annotation.Cacheable;
-import com.hxl.cache.cache.MultiLevelCacheManager;
-import com.hxl.cache.metadata.CacheAnnotationScanner;
-import com.hxl.cache.metadata.CacheMethodMetadata;
-import com.hxl.cache.util.BloomFilterUtils;
-import com.hxl.cache.util.CompressUtils;
-import com.hxl.cache.util.SerializerUtils;
-import com.hxl.cache.util.SpelUtils;
+import com.mx.cache.annotation.Cacheable;
+import com.mx.cache.cache.MultiLevelCacheManager;
+import com.mx.cache.metadata.CacheAnnotationScanner;
+import com.mx.cache.metadata.CacheMethodMetadata;
+import com.mx.cache.util.BloomFilterUtils;
+import com.mx.cache.util.CompressUtils;
+import com.mx.cache.util.SerializerUtils;
+import com.mx.cache.util.SpelUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -30,7 +30,7 @@ public class CacheAspect {
     private final BloomFilterUtils bloomFilterUtils;
     private final ReentrantLock lock = new ReentrantLock();
 
-    @Around("@annotation(com.hxl.cache.annotation.Cacheable)")
+    @Around("@annotation(com.mx.cache.annotation.Cacheable)")
     public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
         Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
         CacheMethodMetadata metadata = annotationScanner.getMetadata(method);

@@ -23,12 +23,12 @@
 
 ```xml
 <dependency>
-    <groupId>com.hxl.cache</groupId>
+    <groupId>com.mx.cache</groupId>
     <artifactId>cache-spring-boot-starter</artifactId>
     <version>1.3-SNAPSHOT</version>
 </dependency>
 ```
-添加扫描包 `com.hxl` ：
+添加扫描包 `com.mx` ：
 
 ### 2. 配置 Redis（可选）
 

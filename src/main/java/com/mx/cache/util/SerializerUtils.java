@@ -1,4 +1,4 @@
-package com.hxl.cache.util;
+package com.mx.cache.util;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;

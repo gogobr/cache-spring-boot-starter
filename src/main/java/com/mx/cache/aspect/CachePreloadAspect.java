@@ -1,8 +1,8 @@
-package com.hxl.cache.aspect;
+package com.mx.cache.aspect;
 
-import com.hxl.cache.annotation.CachePreload;
-import com.hxl.cache.metadata.CacheAnnotationScanner;
-import com.hxl.cache.metadata.CacheMethodMetadata;
+import com.mx.cache.annotation.CachePreload;
+import com.mx.cache.metadata.CacheAnnotationScanner;
+import com.mx.cache.metadata.CacheMethodMetadata;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -28,7 +28,7 @@ public class CachePreloadAspect {
     // 记录已启动的预加载任务，避免重复启动
     private final ConcurrentHashMap<String, Boolean> startedTasks = new ConcurrentHashMap<>();
 
-    @Around("@annotation(com.hxl.cache.annotation.CachePreload)")
+    @Around("@annotation(com.mx.cache.annotation.CachePreload)")
     public Object aroundPreload(ProceedingJoinPoint joinPoint) throws Throwable {
         Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
         CacheMethodMetadata metadata = annotationScanner.getMetadata(method);

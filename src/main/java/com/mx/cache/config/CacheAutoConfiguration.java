@@ -1,20 +1,20 @@
-package com.hxl.cache.config;
+package com.mx.cache.config;
 
-import com.hxl.cache.aspect.BatchCacheAspect;
-import com.hxl.cache.aspect.CacheAspect;
-import com.hxl.cache.aspect.CachePreloadAspect;
-import com.hxl.cache.aspect.CacheRefreshAspect;
-import com.hxl.cache.cache.MultiLevelCacheManager;
-import com.hxl.cache.cache.RemoteCache;
-import com.hxl.cache.metadata.CacheAnnotationScanner;
-import com.hxl.cache.util.BloomFilterUtils;
+import com.mx.cache.aspect.BatchCacheAspect;
+import com.mx.cache.aspect.CacheAspect;
+import com.mx.cache.aspect.CachePreloadAspect;
+import com.mx.cache.aspect.CacheRefreshAspect;
+import com.mx.cache.cache.MultiLevelCacheManager;
+import com.mx.cache.cache.NoOpRemoteCache;
+import com.mx.cache.cache.RemoteCache;
+import com.mx.cache.metadata.CacheAnnotationScanner;
+import com.mx.cache.util.BloomFilterUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -100,7 +100,7 @@ public class CacheAutoConfiguration {
 
     private RemoteCache createNoOpRemoteCache() {
         // 创建一个不可用的 RemoteCache，这样多级缓存可以只使用本地缓存
-        return new com.hxl.cache.cache.NoOpRemoteCache();
+        return new NoOpRemoteCache();
     }
 
     /**

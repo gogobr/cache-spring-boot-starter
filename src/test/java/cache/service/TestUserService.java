@@ -1,8 +1,8 @@
 package cache.service;
 
 import cache.TestUser;
-import com.hxl.cache.annotation.Cacheable;
-import com.hxl.cache.annotation.CacheableBatch;
+import com.mx.cache.annotation.Cacheable;
+import com.mx.cache.annotation.CacheableBatch;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

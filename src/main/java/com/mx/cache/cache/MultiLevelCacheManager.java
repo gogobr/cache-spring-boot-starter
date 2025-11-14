@@ -1,6 +1,6 @@
-package com.hxl.cache.cache;
+package com.mx.cache.cache;
 
-import com.hxl.cache.annotation.Cacheable;
+import com.mx.cache.annotation.Cacheable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

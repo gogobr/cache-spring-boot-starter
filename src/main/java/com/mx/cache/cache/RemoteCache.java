@@ -1,4 +1,4 @@
-package com.hxl.cache.cache;
+package com.mx.cache.cache;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

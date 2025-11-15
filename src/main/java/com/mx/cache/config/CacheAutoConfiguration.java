@@ -135,7 +135,7 @@ public class CacheAutoConfiguration {
             BloomFilterUtils bloomFilterUtils,
             CacheProperties properties) {
         // 如果没有 Redis，lockRedisTemplate 为 null，热点 key 保护功能将不可用
-        CacheAspect aspect = new CacheAspect(annotationScanner, cacheManager, lockRedisTemplate, bloomFilterUtils);
+        CacheAspect aspect = new CacheAspect(annotationScanner, cacheManager, lockRedisTemplate, bloomFilterUtils, properties);
         return aspect;
     }
 

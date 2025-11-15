@@ -1,7 +1,6 @@
 package com.mx.cache.util;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;

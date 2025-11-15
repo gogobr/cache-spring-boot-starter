@@ -7,12 +7,26 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 
 @Slf4j
 public class SerializerUtils {
     private static final ThreadLocal<Kryo> KRYO_THREAD_LOCAL = ThreadLocal.withInitial(() -> {
         Kryo kryo = new Kryo();
         kryo.setRegistrationRequired(false);
+
+        // 优化：但预先注册常用的 JDK 类，以提高序列化效率
+        // 即使 setRegistrationRequired(false)，预注册的类也会使用 ID
+        kryo.register(ArrayList.class);
+        kryo.register(HashMap.class);
+        kryo.register(HashSet.class);
+        kryo.register(Date.class);
+
+        // (例如 Order -> User -> List<Order> 的场景)
+        kryo.setReferences(true);
         return kryo;
     });
 

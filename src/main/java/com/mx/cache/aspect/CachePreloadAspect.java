@@ -15,6 +15,7 @@ import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @Aspect
@@ -48,57 +49,108 @@ public class CachePreloadAspect {
         return joinPoint.proceed();
     }
 
-    private void startPreloadTask(ProceedingJoinPoint joinPoint, Method method, 
+    private void startPreloadTask(ProceedingJoinPoint joinPoint, Method method,
                                   CachePreload preload, CacheMethodMetadata metadata) {
-        Runnable preloadTask = () -> {
-            try {
-                Object targetBean = applicationContext.getBean(joinPoint.getTarget().getClass());
-                int retryCount = preload.retryCount();
-                long retryInterval = preload.retryInterval();
-                
-                for (int i = 0; i < retryCount; i++) {
-                    try {
-                        // 调用方法以预热缓存
-                        method.invoke(targetBean, joinPoint.getArgs());
-                        log.info("Cache preload successful, method: {}", method.getName());
-                        break;
-                    } catch (Exception e) {
-                        log.warn("Cache preload failed, attempt {}/{}, method: {}", 
-                                i + 1, retryCount, method.getName(), e);
-                        if (i < retryCount - 1) {
-                            try {
-                                Thread.sleep(retryInterval);
-                            } catch (InterruptedException ie) {
-                                Thread.currentThread().interrupt();
-                                break;
-                            }
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                log.error("Cache preload task execution failed, method: {}", method.getName(), e);
-            }
-        };
 
         // 根据配置决定同步或异步执行
         if (preload.async()) {
+            // --- 优化路径：async = true ---
+            // 使用非阻塞的、可自我调度的 Runnable
+
+            // 使用 AtomicInteger 来在 Runnable 内部跟踪重试次数
+            final AtomicInteger attemptCounter = new AtomicInteger(1);
+            final int maxAttempts = preload.retryCount();
+            final long retryInterval = preload.retryInterval();
+
+            Runnable nonBlockingPreloadTask = new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Object targetBean = applicationContext.getBean(joinPoint.getTarget().getClass());
+                        // 1. 尝试调用方法
+                        method.invoke(targetBean, joinPoint.getArgs());
+                        log.info("Cache preload successful, method: {}", method.getName());
+                        // 成功，任务结束
+
+                    } catch (Exception e) {
+                        int currentAttempt = attemptCounter.get();
+                        log.warn("Cache preload failed, attempt {}/{}, method: {}",
+                                currentAttempt, maxAttempts, method.getName(), e);
+
+                        if (currentAttempt < maxAttempts) {
+                            // 2. 失败，但可重试：
+                            // 优化：调度下一次重试，而不是 Thread.sleep
+                            attemptCounter.incrementAndGet();
+                            try {
+                                cacheScheduler.schedule(this, retryInterval, TimeUnit.MILLISECONDS); //
+                            } catch (Exception scheduleException) {
+                                log.error("Failed to schedule preload retry for method: {}", method.getName(), scheduleException);
+                            }
+                        } else {
+                            // 3. 失败，且无重试次数：
+                            log.error("Cache preload failed after {} attempts, method: {}",
+                                    maxAttempts, method.getName());
+                            // 任务结束
+                        }
+                    } catch (Throwable t) {
+                        log.error("Cache preload task execution failed critically (Throwable), method: {}", method.getName(), t);
+                    }
+                }
+            };
+
+            // 提交非阻塞任务
             if (preload.delay() > 0) {
-                cacheScheduler.schedule(preloadTask, preload.delay(), TimeUnit.MILLISECONDS);
+                cacheScheduler.schedule(nonBlockingPreloadTask, preload.delay(), TimeUnit.MILLISECONDS); //
             } else {
-                cacheScheduler.submit(preloadTask);
+                cacheScheduler.submit(nonBlockingPreloadTask); //
             }
+
         } else {
+            // --- 保持原状：async = false ---
+            // 这种情况下，用户期望阻塞当前线程（例如 Spring 启动线程）
+            // 这里的 Thread.sleep 是符合预期的，且不会占用 cacheScheduler 线程
+            Runnable blockingPreloadTask = () -> {
+                try {
+                    Object targetBean = applicationContext.getBean(joinPoint.getTarget().getClass());
+                    int retryCount = preload.retryCount();
+
+                    for (int i = 0; i < retryCount; i++) {
+                        try {
+                            // 调用方法以预热缓存
+                            method.invoke(targetBean, joinPoint.getArgs());
+                            log.info("Cache preload successful, method: {}", method.getName());
+                            break; // Success
+                        } catch (Exception e) {
+                            log.warn("Cache preload failed, attempt {}/{}, method: {}",
+                                    i + 1, retryCount, method.getName(), e);
+                            if (i < retryCount - 1) {
+                                try {
+                                    // 阻塞当前线程 (非 scheduler 线程)
+                                    Thread.sleep(preload.retryInterval()); //
+                                } catch (InterruptedException ie) {
+                                    Thread.currentThread().interrupt();
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error("Cache preload task execution failed, method: {}", method.getName(), e);
+                }
+            };
+
+            // 在当前线程执行阻塞任务
             if (preload.delay() > 0) {
                 try {
-                    Thread.sleep(preload.delay());
+                    Thread.sleep(preload.delay()); //
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
             }
-            preloadTask.run();
+            blockingPreloadTask.run();
         }
-        
-        log.info("Cache preload task started, method: {}, async: {}, delay: {}ms", 
+
+        log.info("Cache preload task started, method: {}, async: {}, delay: {}ms",
                 method.getName(), preload.async(), preload.delay());
     }
 

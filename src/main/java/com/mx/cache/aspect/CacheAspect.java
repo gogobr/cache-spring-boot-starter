@@ -19,6 +19,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 
 @Slf4j
 @Aspect
@@ -158,11 +159,12 @@ public class CacheAspect {
     private Object retryCacheQuery(String cacheName, String cacheKey, Cacheable cacheable,
                                    Method method, int retryCount, long retryIntervalMs) {
         for (int i = 0; i < retryCount; i++) {
-            try {
-                // 等待回源线程写入缓存
-                Thread.sleep(retryIntervalMs);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+            // 优化：使用 LockSupport.parkNanos() 替代 Thread.sleep()，避免阻塞线程
+            // LockSupport 是更底层的 API，性能更好，不会浪费线程资源
+            LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(retryIntervalMs));
+            
+            // 检查中断状态
+            if (Thread.currentThread().isInterrupted()) {
                 log.warn("Hot key retry interrupted, key: {}", cacheKey);
                 return null;
             }

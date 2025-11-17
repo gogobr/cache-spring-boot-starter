@@ -27,10 +27,10 @@
 <dependency>
     <groupId>com.mx.cache</groupId>
     <artifactId>cache-spring-boot-starter</artifactId>
-    <version>1.3-SNAPSHOT</version>
+    <version>1.4-SNAPSHOT</version>
 </dependency>
 ```
-添加扫描包 `com.mx` ：
+添加扫描包 `com.mx.cache` ：
 
 ### 2. 配置 Redis（可选）
 

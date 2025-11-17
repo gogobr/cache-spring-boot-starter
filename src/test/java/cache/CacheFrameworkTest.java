@@ -307,5 +307,10 @@
 //
 //        log.info("\n所有功能测试完成！");
 //    }
+//
+//    @Test
+//    public void test() throws InterruptedException {
+//        testUserService.test(Arrays.asList(1L, 2L, 3L), "test");
+//    }
 //}
 //

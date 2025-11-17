@@ -132,6 +132,23 @@ public class TestUserService {
         return batchGetUsersByIds(ids);
     }
 
+    @CacheableBatch(
+        cacheNames = {"test-user"},
+        itemKey = "T(cache.service.TestUserService).getPrefix() + '::' + #ids",
+        batchMethod = "batchGetUsersByIds",
+        itemType = TestUser.class,
+        expire = 20,
+        expireUnit = TimeUnit.SECONDS
+    )
+    public List<TestUser> test(List<Long> ids, String type) {
+        log.info("=== 执行 getUsersByIdsWithResultFieldExpire 方法，ids: {} ===", ids);
+        return batchGetUsersByIds(ids);
+    }
+
+    public static String getPrefix() {
+        return "test-user-";
+    }
+
     /**
      * 批量查询的底层方法
      */

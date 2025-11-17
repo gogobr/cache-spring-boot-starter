@@ -34,17 +34,31 @@ public class BatchCacheAspect {
             return joinPoint.proceed();
         }
 
-        // 1. 获取方法参数和集合参数
+        // 1. & 2. 使用“智能 SpEL”方案，一次性生成 ID -> BaseKey 的映射
         Object[] args = joinPoint.getArgs();
         String[] paramNames = metadata.getParamNames();
-        List<?> idList = extractIdList(args, paramNames, cacheableBatch);
-        if (idList.isEmpty()) {
+
+        Map<Object, String> idToBaseKeyMap = SpelUtils.evaluateKeyTemplate(
+                cacheableBatch.itemKey(),
+                args,
+                paramNames
+        );
+
+        // 如果SpEL没有返回任何Key（例如，传入的ID列表为空）
+        if (idToBaseKeyMap.isEmpty()) {
+            log.debug("Batch cache: SpEL evaluation returned no keys. Returning empty list.");
             return Collections.emptyList();
         }
 
-        // 2. 生成每个元素的缓存key
-        Map<Object, String> idToKeyMap = generateIdToKeyMap(
-                idList, args, paramNames, method, cacheableBatch);
+        // 2.1 添加缓存前缀，生成最终的 ID -> FullKey 映射
+        String cachePrefix = cacheableBatch.cacheNames()[0] + "::";
+        Map<Object, String> idToKeyMap = new LinkedHashMap<>(); // 保持顺序
+        for (Map.Entry<Object, String> entry : idToBaseKeyMap.entrySet()) {
+            idToKeyMap.put(entry.getKey(), cachePrefix + entry.getValue());
+        }
+
+        // 2.2 从 Map 的 KeySet 中获取 ID 列表 (顺序得以保持)
+        List<Object> idList = new ArrayList<>(idToKeyMap.keySet());
 
         // 3. 从缓存查询已存在的元素
         Map<Object, Object> cachedResults = queryCachedItems(idToKeyMap, cacheableBatch);
@@ -65,49 +79,6 @@ public class BatchCacheAspect {
 
         // 7. 合并缓存结果和新查询结果（保持原有序）
         return mergeResults(idList, cachedResults, freshResults);
-    }
-
-    /**
-     * 从方法参数中提取 ID 列表
-     *
-     * @param args 方法参数
-     * @param paramNames 参数名称
-     * @param batch 批量缓存注解
-     * @return ID 列表
-     */
-    private List<?> extractIdList(Object[] args, String[] paramNames, CacheableBatch batch) {
-        if (batch == null || batch.itemKey() == null || batch.itemKey().isEmpty()) {
-            log.warn("Batch cache itemKey is null or empty");
-            return Collections.emptyList();
-        }
-
-        try {
-            Object result = SpelUtils.evaluate(batch.itemKey(), args, paramNames, Object.class);
-            if (result instanceof List) {
-                return (List<?>) result;
-            }
-            log.warn("Batch cache id list is not a List, type: {}, method: {}",
-                    result != null ? result.getClass().getName() : "null", batch.batchMethod());
-            return Collections.emptyList();
-        } catch (Exception e) {
-            log.error("Failed to extract id list, itemKey: {}, error: {}", batch.itemKey(), e.getMessage(), e);
-            return Collections.emptyList();
-        }
-    }
-
-    private Map<Object, String> generateIdToKeyMap(
-            List<?> idList, Object[] args, String[] paramNames, Method method, CacheableBatch batch) {
-        return idList.stream()
-                .collect(Collectors.toMap(
-                        id -> id,
-                        id -> generateItemCacheKey(id, args, paramNames, method, batch)
-                ));
-    }
-
-    private String generateItemCacheKey(
-            Object id, Object[] args, String[] paramNames, Method method, CacheableBatch batch) {
-        String key = SpelUtils.evaluate(batch.itemKey(), args, paramNames, String.class);
-        return batch.cacheNames()[0] + "::" + key;
     }
 
     /**

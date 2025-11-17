@@ -226,14 +226,19 @@ public class ProductService {
 
 用于优化批量查询场景，自动分离已缓存和未缓存的数据，只查询未缓存的数据。
 
-**性能优化**：框架内部使用 Redis Pipeline 进行批量查询和写入，相比单次操作性能提升 10-50 倍。
+**核心特性**：
+- ✅ **智能 SpEL 投影**：自动检测集合参数，为每个元素生成独立的缓存 key
+- ✅ **Redis Pipeline 优化**：批量查询/写入性能提升 10-50 倍
+- ✅ **支持静态方法前缀**：可在表达式中调用静态方法获取前缀（如从 ThreadLocal 获取用户ID）
+- ✅ **支持数组和集合**：自动识别 `Collection` 和数组类型
+- ✅ **保持顺序**：结果顺序与输入 ID 列表保持一致
 
 #### 属性说明
 
 | 属性 | 类型 | 必填 | 说明 |
 |------|------|------|------|
 | `cacheNames` | String[] | ✅ | 缓存名称数组 |
-| `itemKey` | String | ✅ | 单个元素的 Key SpEL 表达式 |
+| `itemKey` | String | ✅ | 单个元素的 Key SpEL 表达式（支持集合参数投影） |
 | `batchMethod` | String | ✅ | 批量查询方法名 |
 | `itemType` | Class<?> | ✅ | 单个元素的类型 |
 | `expire` | long | ❌ | 过期时间（默认 3600 秒） |
@@ -242,7 +247,22 @@ public class ProductService {
 | `zipThreshold` | int | ❌ | 压缩阈值（默认 1024 字节） |
 | `maxKeySize` | int | ❌ | 最大 Key 长度（默认 256 字节） |
 
+#### 智能 SpEL 投影说明
+
+`itemKey` 支持智能投影模式，框架会自动：
+1. **检测集合参数**：通过参数类型判断是否为集合或数组
+2. **自动投影**：为集合中的每个元素生成独立的缓存 key
+3. **支持复杂表达式**：可在表达式中调用静态方法、拼接字符串等
+
+**工作原理**：
+- 如果 `itemKey` 表达式引用了集合参数（如 `#ids`），框架会自动为每个元素生成 key
+- 例如：`itemKey = "T(...).getUserId() + '::' + #ids"`
+  - 输入：`ids = [1, 2, 3]`，`getUserId()` 返回 `"user123"`
+  - 输出：`["user123::1", "user123::2", "user123::3"]`
+
 #### 使用示例
+
+##### 基础用法
 
 ```java
 @Service
@@ -260,22 +280,126 @@ public class UserService {
     // 批量查询方法（使用批量缓存）
     @CacheableBatch(
         cacheNames = {"user"},
-        itemKey = "#id",
+        itemKey = "#ids",  // 直接引用集合参数，框架会自动为每个元素生成 key
         batchMethod = "batchGetUsersByIds",
         itemType = User.class
     )
     public List<User> getUsersByIds(List<Long> ids) {
         // 框架会自动：
-        // 1. 从缓存中查询已存在的用户
-        // 2. 只查询未缓存的用户ID
-        // 3. 将新查询的结果存入缓存
-        // 4. 合并结果并保持原有顺序
+        // 1. 为每个 ID 生成缓存 key（如：user::1, user::2, user::3）
+        // 2. 从缓存中查询已存在的用户
+        // 3. 只查询未缓存的用户ID
+        // 4. 将新查询的结果存入缓存
+        // 5. 合并结果并保持原有顺序
         return batchGetUsersByIds(ids);
     }
     
     // 批量查询的底层方法
     public List<User> batchGetUsersByIds(List<Long> ids) {
         return userRepository.findByIds(ids);
+    }
+}
+```
+
+##### 使用静态方法获取前缀（多租户场景）
+
+```java
+@Service
+public class OrderService {
+    
+    /**
+     * 批量查询用户订单（带用户ID前缀）
+     * 缓存 key 格式：order::userId::orderId
+     */
+    @CacheableBatch(
+        cacheNames = {"order"},
+        itemKey = "T(com.mx.cache.util.UserContext).getUserId() + '::' + #ids",
+        batchMethod = "batchGetOrdersByIds",
+        itemType = Order.class,
+        expire = 1800
+    )
+    public List<Order> getOrdersByIds(List<Long> orderIds) {
+        // 假设 UserContext.getUserId() 返回 "user123"
+        // 生成的缓存 key：
+        // - order::user123::1
+        // - order::user123::2
+        // - order::user123::3
+        return batchGetOrdersByIds(orderIds);
+    }
+    
+    private List<Order> batchGetOrdersByIds(List<Long> orderIds) {
+        return orderRepository.findByIds(orderIds);
+    }
+}
+```
+
+##### 使用多个前缀组合
+
+```java
+@Service
+public class OrderService {
+    
+    /**
+     * 批量查询订单（带租户和用户ID前缀）
+     * 缓存 key 格式：order::tenantId::userId::orderId
+     */
+    @CacheableBatch(
+        cacheNames = {"order"},
+        itemKey = "T(com.mx.cache.util.TenantContext).getTenantId() + '::' + " +
+                  "T(com.mx.cache.util.UserContext).getUserId() + '::' + #ids",
+        batchMethod = "batchGetOrdersByIds",
+        itemType = Order.class
+    )
+    public List<Order> getOrdersByIds(List<Long> orderIds) {
+        return batchGetOrdersByIds(orderIds);
+    }
+}
+```
+
+##### 使用其他方法参数
+
+```java
+@Service
+public class OrderService {
+    
+    /**
+     * 批量查询订单（带类型参数）
+     * 缓存 key 格式：order::type::orderId
+     */
+    @CacheableBatch(
+        cacheNames = {"order"},
+        itemKey = "#type + '::' + #ids",
+        batchMethod = "batchGetOrdersByIds",
+        itemType = Order.class
+    )
+    public List<Order> getOrdersByType(String type, List<Long> orderIds) {
+        // 生成的缓存 key：
+        // - order::PAID::1
+        // - order::PAID::2
+        // - order::PAID::3
+        return batchGetOrdersByIds(type, orderIds);
+    }
+}
+```
+
+##### 支持数组类型
+
+```java
+@Service
+public class ProductService {
+    
+    /**
+     * 支持数组类型参数
+     */
+    @CacheableBatch(
+        cacheNames = {"product"},
+        itemKey = "T(com.mx.cache.util.UserContext).getUserId() + '::' + #productIds",
+        batchMethod = "batchGetProducts",
+        itemType = Product.class
+    )
+    public List<Product> getProducts(Long[] productIds) {
+        // 数组类型也会被自动识别和处理
+        return batchGetProducts(productIds);
     }
 }
 ```
@@ -486,12 +610,27 @@ public class OrderService {
      */
     @CacheableBatch(
         cacheNames = {"order"},
-        itemKey = "#id",
+        itemKey = "#ids",  // 直接引用集合参数
         batchMethod = "batchGetOrdersByIds",
         itemType = Order.class,
         expire = 1800
     )
     public List<Order> getOrdersByIds(List<Long> ids) {
+        return batchGetOrdersByIds(ids);
+    }
+    
+    /**
+     * 批量查询：使用静态方法获取前缀（多租户场景）
+     */
+    @CacheableBatch(
+        cacheNames = {"order"},
+        itemKey = "T(com.mx.cache.util.UserContext).getUserId() + '::' + #ids",
+        batchMethod = "batchGetOrdersByIds",
+        itemType = Order.class,
+        expire = 1800
+    )
+    public List<Order> getOrdersWithPrefix(List<Long> ids) {
+        // 生成的缓存 key：order::user123::1, order::user123::2, order::user123::3
         return batchGetOrdersByIds(ids);
     }
     
@@ -671,12 +810,23 @@ cache:
 // ✅ 使用批量缓存（自动使用 Pipeline，性能提升 10-50 倍）
 @CacheableBatch(
     cacheNames = {"user"},
-    itemKey = "#id",
+    itemKey = "#ids",  // 直接引用集合参数，框架自动为每个元素生成 key
     batchMethod = "batchGetUsers",
     itemType = User.class
 )
 public List<User> getUsers(List<Long> ids) {
     return batchGetUsers(ids);
+}
+
+// ✅ 使用静态方法获取前缀（多租户场景）
+@CacheableBatch(
+    cacheNames = {"order"},
+    itemKey = "T(com.mx.cache.util.UserContext).getUserId() + '::' + #ids",
+    batchMethod = "batchGetOrders",
+    itemType = Order.class
+)
+public List<Order> getOrders(List<Long> orderIds) {
+    return batchGetOrders(orderIds);
 }
 
 // ❌ 避免循环调用单个缓存方法
@@ -692,6 +842,12 @@ public List<User> getUsersBad(List<Long> ids) {
   - 单次查询：500-2000ms（100 次网络往返）
   - Pipeline 批量查询：20-100ms（1 次网络往返）
   - **性能提升：10-50 倍**
+
+**智能 SpEL 投影特性**：
+- 框架自动检测集合参数，无需手动遍历
+- 支持在表达式中调用静态方法获取前缀
+- 支持数组和集合类型
+- 自动为每个元素生成独立的缓存 key
 
 ### 7. 缓存预热策略
 
@@ -917,8 +1073,42 @@ spring:
 
 ---
 
-**版本**: 1.3-SNAPSHOT  
+**版本**: 1.4-SNAPSHOT  
 **最后更新**: 2024年
+
+## 🆕 最新更新
+
+### v1.4-SNAPSHOT - 批量缓存智能 SpEL 投影
+
+**新增功能**：
+- ✅ **智能 SpEL 投影**：`@CacheableBatch` 现在支持智能投影模式，自动检测集合参数并为每个元素生成独立的缓存 key
+- ✅ **静态方法前缀支持**：可在 `itemKey` 表达式中调用静态方法获取前缀（如从 ThreadLocal 获取用户ID）
+- ✅ **数组类型支持**：支持 `Collection` 和数组类型参数
+- ✅ **顺序保持**：结果顺序与输入 ID 列表保持一致
+
+**使用示例**：
+```java
+// 简单用法：直接引用集合参数
+@CacheableBatch(
+    cacheNames = {"user"},
+    itemKey = "#ids",  // 框架自动为每个元素生成 key
+    batchMethod = "batchGetUsers",
+    itemType = User.class
+)
+
+// 高级用法：使用静态方法获取前缀
+@CacheableBatch(
+    cacheNames = {"order"},
+    itemKey = "T(com.mx.cache.util.UserContext).getUserId() + '::' + #ids",
+    batchMethod = "batchGetOrders",
+    itemType = Order.class
+)
+```
+
+**工作原理**：
+1. 框架自动检测 `itemKey` 表达式中引用的集合参数（通过参数类型判断）
+2. 为集合中的每个元素生成独立的缓存 key
+3. 使用 Redis Pipeline 批量查询和写入，性能提升 10-50 倍
 
 
 

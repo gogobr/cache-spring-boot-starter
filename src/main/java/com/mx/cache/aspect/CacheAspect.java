@@ -159,7 +159,7 @@ public class CacheAspect {
     private Object retryCacheQuery(String cacheName, String cacheKey, Cacheable cacheable,
                                    Method method, int retryCount, long retryIntervalMs) {
         for (int i = 0; i < retryCount; i++) {
-            // 优化：使用 LockSupport.parkNanos() 替代 Thread.sleep()，避免阻塞线程
+            // 使用 LockSupport.parkNanos() 替代 Thread.sleep()，避免阻塞线程
             // LockSupport 是更底层的 API，性能更好，不会浪费线程资源
             LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(retryIntervalMs));
             

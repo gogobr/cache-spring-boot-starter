@@ -253,7 +253,7 @@ public class BatchCacheAspect {
     }
 
     /**
-     * 优化：先组装 Map，然后使用 pipeline 批量写入
+     * 先组装 Map，然后使用 pipeline 批量写入
      */
     private void putFreshItemsToCache(
             Map<Object, Object> freshResults, Map<Object, String> idToKeyMap, CacheableBatch batch) {

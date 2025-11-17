@@ -79,7 +79,7 @@ public class CachePreloadAspect {
 
                         if (currentAttempt < maxAttempts) {
                             // 2. 失败，但可重试：
-                            // 优化：调度下一次重试，而不是 Thread.sleep
+                            // 调度下一次重试，而不是 Thread.sleep
                             attemptCounter.incrementAndGet();
                             try {
                                 cacheScheduler.schedule(this, retryInterval, TimeUnit.MILLISECONDS); //

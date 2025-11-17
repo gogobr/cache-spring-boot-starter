@@ -50,8 +50,7 @@ public class RemoteCache {
         }
 
         try {
-            byte[] value = redisTemplate.opsForValue().get(key);
-            return value;
+            return redisTemplate.opsForValue().get(key);
         } catch (Exception e) {
             log.error("Redis get error, key: {}, error: {}", key, e.getMessage(), e);
             checkHealth();

@@ -24,7 +24,7 @@ public class BloomFilterUtils {
 
     /**
      * 添加 key 到布隆过滤器
-     * 优化：Guava BloomFilter 的 put() 方法是线程安全的，无需额外同步
+     * Guava BloomFilter 的 put() 方法是线程安全的，无需额外同步
      *
      * @param cacheName 缓存名称
      * @param key 缓存 key

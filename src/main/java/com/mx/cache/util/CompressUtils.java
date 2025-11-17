@@ -11,7 +11,7 @@ import java.util.zip.GZIPOutputStream;
 public class CompressUtils {
     
     /**
-     * 优化：使用 ThreadLocal 复用 buffer，减少对象创建和 GC 压力
+     * 使用 ThreadLocal 复用 buffer，减少对象创建和 GC 压力
      */
     private static final ThreadLocal<byte[]> BUFFER_CACHE = ThreadLocal.withInitial(() -> new byte[8192]);
     
@@ -27,7 +27,7 @@ public class CompressUtils {
 
     /**
      * 压缩数据
-     * 优化：设置合理的初始容量
+     * 设置合理的初始容量
      *
      * @param data 待压缩数据
      * @return 压缩后的数据
@@ -36,7 +36,7 @@ public class CompressUtils {
         if (data == null || data.length == 0) return data;
 
         try {
-            // 优化：根据数据大小设置初始容量
+            // 根据数据大小设置初始容量
             int initialCapacity = Math.max(data.length / 2, 256);
             ByteArrayOutputStream baos = new ByteArrayOutputStream(initialCapacity);
             GZIPOutputStream gzip = new GZIPOutputStream(baos);
@@ -56,7 +56,7 @@ public class CompressUtils {
 
     /**
      * 解压数据
-     * 优化：动态调整 buffer 大小，使用 ThreadLocal 复用 buffer
+     * 动态调整 buffer 大小，使用 ThreadLocal 复用 buffer
      *
      * @param data 待解压数据
      * @return 解压后的数据
@@ -70,7 +70,7 @@ public class CompressUtils {
             ByteArrayOutputStream baos = new ByteArrayOutputStream(data.length * 2);
             
             try {
-                // 优化：根据数据大小动态调整 buffer，使用 ThreadLocal 复用
+                // 根据数据大小动态调整 buffer，使用 ThreadLocal 复用
                 int bufferSize = Math.min(Math.max(data.length, MIN_BUFFER_SIZE), MAX_BUFFER_SIZE);
                 byte[] buffer = BUFFER_CACHE.get();
                 if (buffer.length < bufferSize) {

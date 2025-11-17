@@ -14,7 +14,7 @@ import java.util.HashSet;
 @Slf4j
 public class SerializerUtils {
     /**
-     * 优化：设置合理的初始容量，减少 ByteArrayOutputStream 扩容次数
+     * 设置合理的初始容量，减少 ByteArrayOutputStream 扩容次数
      */
     private static final int DEFAULT_BUFFER_SIZE = 1024; // 1KB 初始容量
     private static final int LARGE_BUFFER_SIZE = 4096;    // 4KB Output buffer
@@ -23,7 +23,7 @@ public class SerializerUtils {
         Kryo kryo = new Kryo();
         kryo.setRegistrationRequired(false);
 
-        // 优化：但预先注册常用的 JDK 类，以提高序列化效率
+        // 但预先注册常用的 JDK 类，以提高序列化效率
         // 即使 setRegistrationRequired(false)，预注册的类也会使用 ID
         kryo.register(ArrayList.class);
         kryo.register(HashMap.class);
@@ -37,7 +37,7 @@ public class SerializerUtils {
 
     /**
      * 序列化对象
-     * 优化：设置合理的初始容量，减少扩容次数，性能提升 5-10%
+     * 设置合理的初始容量，减少扩容次数，性能提升 5-10%
      *
      * @param obj 待序列化对象
      * @return 序列化后的字节数组
@@ -46,7 +46,7 @@ public class SerializerUtils {
         if (obj == null) return null;
 
         try {
-            // 优化：设置初始容量，减少扩容次数
+            // 设置初始容量，减少扩容次数
             ByteArrayOutputStream baos = new ByteArrayOutputStream(DEFAULT_BUFFER_SIZE);
             Output output = new Output(baos, LARGE_BUFFER_SIZE);
             try {
@@ -65,7 +65,7 @@ public class SerializerUtils {
 
     /**
      * 反序列化对象
-     * 优化：直接使用字节数组创建 Input，避免 ByteArrayInputStream 开销
+     * 直接使用字节数组创建 Input，避免 ByteArrayInputStream 开销
      *
      * @param data 序列化后的字节数组
      * @param clazz 目标类型
@@ -75,7 +75,7 @@ public class SerializerUtils {
         if (data == null || data.length == 0) return null;
 
         try {
-            // 优化：直接使用字节数组，避免 ByteArrayInputStream 开销
+            // 直接使用字节数组，避免 ByteArrayInputStream 开销
             Input input = new Input(data);
             try {
                 return KRYO_THREAD_LOCAL.get().readObject(input, clazz);

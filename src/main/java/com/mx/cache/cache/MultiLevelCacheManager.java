@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 多级缓存管理器
- * 优化：
+ *
  * 1. 使用 ConcurrentHashMap 保证线程安全
  * 2. 缓存 cacheLevels 分割结果，避免频繁 split
  * 3. 优化缓存层级判断逻辑
@@ -19,14 +19,14 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class MultiLevelCacheManager {
     /**
-     * 优化：使用 ConcurrentHashMap 保证线程安全
+     * 使用 ConcurrentHashMap 保证线程安全
      */
     private final Map<String, LocalCache> localCaches = new ConcurrentHashMap<>();
     
     private final RemoteCache remoteCache;
     
     /**
-     * 优化：缓存 cacheLevels 分割结果，避免频繁 split
+     * 缓存 cacheLevels 分割结果，避免频繁 split
      * Key: cacheLevels 字符串，Value: 分割后的数组
      */
     private final Map<String, String[]> cacheLevelsCache = new ConcurrentHashMap<>();
@@ -65,7 +65,7 @@ public class MultiLevelCacheManager {
 
     /**
      * 获取缓存值
-     * 优化：使用缓存层级标志位，避免频繁字符串比较
+     * 使用缓存层级标志位，避免频繁字符串比较
      *
      * @param cacheName 缓存名称
      * @param key 缓存 key
@@ -99,7 +99,7 @@ public class MultiLevelCacheManager {
 
     /**
      * 写入缓存值
-     * 优化：使用缓存层级标志位
+     * 使用缓存层级标志位
      *
      * @param cacheName 缓存名称
      * @param key 缓存 key
@@ -125,7 +125,7 @@ public class MultiLevelCacheManager {
 
     /**
      * 删除缓存值
-     * 优化：使用缓存层级标志位
+     * 使用缓存层级标志位
      *
      * @param cacheName 缓存名称
      * @param key 缓存 key
@@ -148,7 +148,7 @@ public class MultiLevelCacheManager {
     
     /**
      * 获取缓存层级标志位
-     * 优化：缓存解析结果，避免频繁 split 和字符串比较
+     * 缓存解析结果，避免频繁 split 和字符串比较
      *
      * @param cacheLevels 缓存层级字符串，如 "local,remote"
      * @return 标志位（LOCAL_FLAG | REMOTE_FLAG）
@@ -168,7 +168,7 @@ public class MultiLevelCacheManager {
     
     /**
      * 获取缓存层级数组（保留作为备用方法，当前使用标志位优化）
-     * 优化：缓存分割结果
+     * 缓存分割结果
      *
      * @param cacheLevels 缓存层级字符串
      * @return 分割后的数组

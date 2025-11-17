@@ -85,7 +85,7 @@ public class CacheAutoConfiguration {
 
     /**
      * MultiLevelCacheManager bean
-     * 优化：支持无 Redis 环境，使用 NoOpRemoteCache 降级
+     * 支持无 Redis 环境，使用 NoOpRemoteCache 降级
      */
     @Bean
     @ConditionalOnMissingBean

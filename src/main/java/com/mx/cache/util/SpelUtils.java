@@ -17,14 +17,14 @@ public class SpelUtils {
     private static final ExpressionParser parser = new SpelExpressionParser();
     
     /**
-     * 优化：缓存解析后的 Expression 对象，避免重复解析
+     * 缓存解析后的 Expression 对象，避免重复解析
      * SpEL 表达式解析是相对昂贵的操作，缓存可以大幅提升性能
      */
     private static final Map<String, Expression> expressionCache = new ConcurrentHashMap<>(256);
 
     /**
      * 评估SpEL表达式
-     * 优化：缓存表达式解析结果，性能提升 10-100 倍
+     * 缓存表达式解析结果，性能提升 10-100 倍
      *
      * @param expression SpEL 表达式
      * @param args 方法参数
@@ -38,7 +38,7 @@ public class SpelUtils {
         }
 
         try {
-            // 优化：从缓存获取或解析表达式
+            // 从缓存获取或解析表达式
             Expression exp = expressionCache.computeIfAbsent(expression, parser::parseExpression);
             StandardEvaluationContext context = new StandardEvaluationContext();
 
@@ -60,13 +60,13 @@ public class SpelUtils {
     }
 
     /**
-     * 优化：缓存 Field 对象，避免频繁反射查找
+     * 缓存 Field 对象，避免频繁反射查找
      */
     private static final Map<String, Field> fieldCache = new ConcurrentHashMap<>(128);
     
     /**
      * 从对象中提取字段值
-     * 优化：缓存 Field 对象，性能提升 10-100 倍
+     * 缓存 Field 对象，性能提升 10-100 倍
      *
      * @param obj 对象
      * @param fieldName 字段名
@@ -78,7 +78,7 @@ public class SpelUtils {
         }
 
         try {
-            // 优化：从缓存获取或查找 Field 对象
+            // 从缓存获取或查找 Field 对象
             String cacheKey = obj.getClass().getName() + "#" + fieldName;
             Field field = fieldCache.computeIfAbsent(cacheKey, key -> {
                 Field f = ReflectionUtils.findField(obj.getClass(), fieldName);

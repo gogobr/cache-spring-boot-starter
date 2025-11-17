@@ -83,7 +83,7 @@
 //        assertEquals(1, testUserService.getGetUserCallCount(),
 //            "缓存未生效！方法应该只被调用一次");
 //
-//        log.info("✅ 基础缓存测试通过：方法只被调用了一次");
+//        log.info("基础缓存测试通过：方法只被调用了一次");
 //    }
 //
 //    /**
@@ -112,7 +112,7 @@
 //        assertNotNull(user4);
 //        // 不满足条件时，每次都会执行方法，所以结果可能不同
 //
-//        log.info("✅ 条件缓存测试通过");
+//        log.info("条件缓存测试通过");
 //    }
 //
 //    /**
@@ -133,7 +133,7 @@
 //        TestUser user2 = testUserService.getUserWithDynamicExpire(4L, null);
 //        assertNotNull(user2);
 //
-//        log.info("✅ 动态过期时间测试通过");
+//        log.info("动态过期时间测试通过");
 //    }
 //
 //    /**
@@ -165,7 +165,7 @@
 //        // 注意：这里需要根据实际实现来验证
 //        log.info("批量查询调用次数: {}", testUserService.getBatchGetUserCallCount());
 //
-//        log.info("✅ 批量缓存测试通过");
+//        log.info("批量缓存测试通过");
 //    }
 //
 //    /**
@@ -212,7 +212,7 @@
 //        assertTrue(actualCalls <= 2,
 //            "并发场景下方法调用次数过多，可能存在缓存穿透问题");
 //
-//        log.info("✅ 并发缓存测试通过");
+//        log.info("并发缓存测试通过");
 //    }
 //
 //    /**
@@ -238,7 +238,7 @@
 //        assertEquals(1, testUserService.getGetUserCallCount(),
 //            "缓存未过期时不应该再次调用方法");
 //
-//        log.info("✅ 缓存过期测试通过（注意：需要等待足够长时间才能测试过期）");
+//        log.info("缓存过期测试通过（注意：需要等待足够长时间才能测试过期）");
 //    }
 //
 //    /**
@@ -260,7 +260,7 @@
 //        assertNotNull(user2);
 //        assertEquals(user1.getName(), user2.getName());
 //
-//        log.info("✅ 仅本地缓存测试通过");
+//        log.info("仅本地缓存测试通过");
 //    }
 //
 //    /**
@@ -273,9 +273,9 @@
 //
 //        if (cacheManager != null) {
 //            assertNotNull(cacheManager, "缓存管理器应该被注入");
-//            log.info("✅ 缓存管理器注入成功");
+//            log.info("缓存管理器注入成功");
 //        } else {
-//            log.warn("⚠️ 缓存管理器未注入（可能 Redis 未配置）");
+//            log.warn("缓存管理器未注入（可能 Redis 未配置）");
 //        }
 //    }
 //
@@ -305,7 +305,7 @@
 //        // 5. 仅本地缓存
 //        testLocalOnlyCache();
 //
-//        log.info("\n✅ 所有功能测试完成！");
+//        log.info("\n所有功能测试完成！");
 //    }
 //}
 //

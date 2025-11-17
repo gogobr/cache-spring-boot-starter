@@ -187,12 +187,12 @@ public class MultiLevelCacheManager {
         if (remoteCache != null) {
             try {
                 remoteCache.clear();
-                log.info("✅ 已清空远程缓存");
+                log.info("已清空远程缓存");
             } catch (Exception e) {
-                log.warn("⚠️ 清空远程缓存时出现异常: {}", e.getMessage());
+                log.warn("清空远程缓存时出现异常: {}", e.getMessage());
             }
         }
 
-        log.info("✅ MultiLevelCacheManager 全部缓存已清空");
+        log.info("MultiLevelCacheManager 全部缓存已清空");
     }
 }

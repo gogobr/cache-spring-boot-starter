@@ -313,7 +313,7 @@ public class OrderService {
      */
     @CacheableBatch(
         cacheNames = {"order"},
-        itemKey = "T(com.mx.cache.util.UserContext).getUserId() + '::' + #ids",
+        itemKey = "T(com.mx.cache.util.UserContext).getUserId() + '::' + #orderIds",
         batchMethod = "batchGetOrdersByIds",
         itemType = Order.class,
         expire = 1800
@@ -346,7 +346,7 @@ public class OrderService {
     @CacheableBatch(
         cacheNames = {"order"},
         itemKey = "T(com.mx.cache.util.TenantContext).getTenantId() + '::' + " +
-                  "T(com.mx.cache.util.UserContext).getUserId() + '::' + #ids",
+                  "T(com.mx.cache.util.UserContext).getUserId() + '::' + #orderIds",
         batchMethod = "batchGetOrdersByIds",
         itemType = Order.class
     )
@@ -368,7 +368,7 @@ public class OrderService {
      */
     @CacheableBatch(
         cacheNames = {"order"},
-        itemKey = "#type + '::' + #ids",
+        itemKey = "#type + '::' + #orderIds",
         batchMethod = "batchGetOrdersByIds",
         itemType = Order.class
     )
